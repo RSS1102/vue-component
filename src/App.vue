@@ -4,5 +4,5 @@
 </template>
 
 <script setup lang="ts">
-import DragHide from './components/draghide.vue';
+import DragHide from './components/dragable/demo.vue';
 </script>
