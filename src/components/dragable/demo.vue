@@ -6,13 +6,27 @@
     </div>
 </template>
 <script setup lang="ts">
-import { nextTick, ref } from "vue";
-import { direction } from "./type";
+import { nextTick, ref, Ref } from "vue";
+import { Direction, Target } from "./type";
 import { useDragable } from "./useDragable";
 // 传入参数
-const placeMent: direction['place'] = 'right';
-const el = ref<HTMLElement | null>(null)
-nextTick(() => useDragable(el, placeMent))
+//const placeMent: Direction = 'left';
+// const placeMent: Direction = 'right';
+const placeMent: Direction = 'top';
+// const placeMent: Direction = 'bottom';
+const el = ref()
+const triggerBoundary = 3;
+const triggerFn = (target: Target) => {
+
+    target.value.style.background = `red`
+}
+const triggeredFn = (target: Target) => {
+    console.log("成功")
+    target.value!.style.background = `green`
+}
+
+nextTick(() => useDragable(el, placeMent, triggerFn, triggeredFn, triggerBoundary))
+
 </script>
 
 <style scoped>
@@ -21,7 +35,7 @@ nextTick(() => useDragable(el, placeMent))
     width: 200px;
     height: 200px;
     background-color: #97cdfd;
-    margin: 100px 100px;
+    margin: 300px;
 }
 
 .place {

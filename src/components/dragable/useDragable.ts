@@ -1,14 +1,21 @@
 
-import { Ref, ref } from "vue";
-import { Position } from "./type"
+import { Ref, ref, watch } from "vue";
+import { Direction, Position, Target } from "./type"
 /**
   * @description 拖拽组件
   * @param {HTMLElement} target 鼠标初始按下位置
   * @param {'right' | 'left' | 'top' | 'bottom'}  direction 拖拽方向
+  * @param {number} triggerBoundary 拖拽边界(默认为2,作为盒子的百分比分母)
+  * @param {() => void} triggerFn 拖拽触发成功回调
+  * @param {() => void} triggeredFn 拖拽触发成功完成后的回调
   */
 
-export const useDragable = (target: Ref<HTMLElement | null>, direction: 'right' | 'left' | 'top' | 'bottom') => {
-
+export const useDragable = (
+    target: Target,
+    direction: Direction,
+    triggerFn: (target: Target) => void,
+    triggeredFn: (target: Target) => void,
+    triggerBoundary: number) => {
     /**
      * @description 鼠标初始按下位置[常量]
      */
@@ -34,6 +41,12 @@ export const useDragable = (target: Ref<HTMLElement | null>, direction: 'right' 
      * @description 是否成功拖拽
      */
     const isSuccess = ref<boolean>(false)
+    /**
+     * @description 记录目标的style
+     */
+    const elStyle = window.getComputedStyle(target.value).backgroundColor
+
+
     const start = (e: MouseEvent) => {
         isDrag.value = true
         initPosition.value = {
@@ -62,68 +75,41 @@ export const useDragable = (target: Ref<HTMLElement | null>, direction: 'right' 
             switch (direction) {
                 case 'right':
                     target.value!.style.left = `${pressedDelta.value!.x}px`
-                    // target.value!.style.left = `${pressedDelta.value!.x}px`
-                    if (pressedDelta.value!.x > 150) {
-                        target.value!.style.left = `150px`
-                    }
-                    if (pressedDelta.value!.x < 0) {
-                        target.value!.style.left = `0px`
-                    }
-                    if (pressedDelta.value!.x > tagrgetDesc.value!.x / 2) {
-                        target.value!.style.background = `red`
-                        isSuccess.value = true
-                    } else {
-                        target.value!.style.background = `#97cdfd`
-                        isSuccess.value = false
-                    }
+                    //大于盒子宽度禁止拖拽
+                    pressedDelta.value!.x > tagrgetDesc.value!.x ?
+                        target.value!.style.left = `${tagrgetDesc.value!.x}px` : ""
+                    //小于边界禁止拖拽
+                    pressedDelta.value!.x < 0 ? target.value!.style.left = `0px` : ""
+                    //成功拖拽
+                    pressedDelta.value!.x > tagrgetDesc.value!.x / triggerBoundary ?
+                        isSuccess.value = true : isSuccess.value = false
+
                     break
                 case 'left':
                     target.value!.style.left = `${pressedDelta.value!.x}px`
-                    if (pressedDelta.value!.x < -150) {
-                        target.value!.style.left = `-150px`
-                    }
-                    if (pressedDelta.value!.x > 0) {
-                        target.value!.style.left = `0px`
-                    }
-                    if (-pressedDelta.value!.x > tagrgetDesc.value!.x / 2) {
-                        target.value!.style.background = `red`
-                        isSuccess.value = true
-                    } else {
-                        target.value!.style.background = `#97cdfd`
-                        isSuccess.value = false
-                    }
+                    pressedDelta.value!.x < -tagrgetDesc.value!.x ?
+                        target.value!.style.left = `-${tagrgetDesc.value!.x}` : ""
+                    pressedDelta.value!.x > 0 ? target.value!.style.left = `0px` : ""
+                    pressedDelta.value!.x < - tagrgetDesc.value!.x / triggerBoundary ?
+                        isSuccess.value = true : isSuccess.value = false
                     break
                 case 'top':
+                    console.log(pressedDelta.value!.y, -tagrgetDesc.value!.y)
                     target.value!.style.top = `${pressedDelta.value!.y}px`
-                    if (pressedDelta.value!.y < -150) {
-                        target.value!.style.top = `-150px`
-                    }
-                    if (pressedDelta.value!.y > 0) {
-                        target.value!.style.top = `0px`
-                    }
-                    if (-pressedDelta.value!.y > tagrgetDesc.value!.y / 2) {
-                        target.value!.style.background = `red`
-                        isSuccess.value = true
-                    } else {
-                        target.value!.style.background = `#97cdfd`
-                        isSuccess.value = false
-                    }
+                    pressedDelta.value!.y < -tagrgetDesc.value!.y ?
+                        target.value!.style.top = `-${tagrgetDesc.value!.y}px` : ""
+                    pressedDelta.value!.y > 0 ? target.value!.style.top = `0px` : ""
+                    pressedDelta.value!.y < -tagrgetDesc.value!.y / triggerBoundary ?
+                        isSuccess.value = true : isSuccess.value = false
                     break
                 case 'bottom':
+
                     target.value!.style.top = `${pressedDelta.value!.y}px`
-                    if (pressedDelta.value!.y > 150) {
-                        target.value!.style.top = `150px`
-                    }
-                    if (pressedDelta.value!.y < 0) {
-                        target.value!.style.top = `0px`
-                    }
-                    if (pressedDelta.value!.y > tagrgetDesc.value!.y / 2) {
-                        target.value!.style.background = `red`
-                        isSuccess.value = true
-                    } else {
-                        target.value!.style.background = `#97cdfd`
-                        isSuccess.value = false
-                    }
+                    pressedDelta.value!.y > tagrgetDesc.value!.y ?
+                        target.value!.style.top = `${tagrgetDesc.value!.y}px` : ""
+                    pressedDelta.value!.y < 0 ? target.value!.style.top = `0px` : ""
+                    pressedDelta.value!.y > tagrgetDesc.value!.y / triggerBoundary ?
+                        isSuccess.value = true : isSuccess.value = false
                     break
             };
         }
@@ -134,17 +120,13 @@ export const useDragable = (target: Ref<HTMLElement | null>, direction: 'right' 
     const end = () => {
         isDrag.value = false
         if (isSuccess.value) {
-            alert('拖拽成功')
-            isSuccess.value = false
-            target.value!.style.left = `0px`;
-            target.value!.style.top = `0px`;
-            target.value!.style.backgroundColor = '#97cdfd';
+            triggeredFn(target)
         } else {
             target.value!.style.left = `0px`;
             target.value!.style.top = `0px`;
         }
     }
-    
+
     const up = (e: MouseEvent) => {
         end()
     }
@@ -156,5 +138,10 @@ export const useDragable = (target: Ref<HTMLElement | null>, direction: 'right' 
     target.value!.addEventListener("mousemove", move);
     target.value!.addEventListener("mouseup", up);
     target.value!.addEventListener("mouseout", out);
+    watch(isSuccess, (val) => {
+        console.log(val)
+        console.log(elStyle)
+        val ? triggerFn(target) : target.value.style.backgroundColor = elStyle
 
+    })
 }

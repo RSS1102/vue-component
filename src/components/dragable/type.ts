@@ -1,8 +1,10 @@
+import { Ref } from "vue"
+
 export interface Position {
-    [x: string]: any
     x: number
     y: number
 }
-export interface direction {
-    place: 'right' | 'left' | 'top' | 'bottom'
-}
+
+export type Direction = 'right' | 'left' | 'top' | 'bottom'
+
+export type Target = Ref<HTMLElement >
