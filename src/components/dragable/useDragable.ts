@@ -134,10 +134,10 @@ export const useDragable = (
     const out = (e: MouseEvent) => {
         end()
     }
-    target.value!.addEventListener("mousedown", start);
-    target.value!.addEventListener("mousemove", move);
-    target.value!.addEventListener("mouseup", up);
-    target.value!.addEventListener("mouseout", out);
+    target.value?.addEventListener("mousedown", start);
+    target.value?.addEventListener("mousemove", move);
+    target.value?.addEventListener("mouseup", up);
+    target.value?.addEventListener("mouseout", out);
     watch(isSuccess, (val) => {
         console.log(val)
         console.log(elStyle)
